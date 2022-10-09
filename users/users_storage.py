@@ -12,13 +12,12 @@ class UserMongoStorage:
             "email":user.email,
             "password":user.password,
             "city":user.city,
-            "role":user.role
+            "role":user.role,
         })
         return str(res.inserted_id)
 
     def get_user_by_email(self,email):
         user = self.db.find_one({'email':email})
-        print(user)
         if user is None:
             return None
         return {
@@ -28,4 +27,13 @@ class UserMongoStorage:
             "username":user['username'],
             "password":user['password']
         }
-        
+
+    def get_user_by_id(self,user_id):
+        user = self.db.find_one({'_id':ObjectId(user_id)})
+        return {
+            "id":str(user['_id']),
+            "name":user['name'],
+            "surname":user['surname'],
+            "username":user['username'],
+            "role":user['role']
+        } 

@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from app import jwt
+
 class UserService:
     def __init__(self,storage):
         self.storage = storage
@@ -9,9 +9,13 @@ class UserService:
 
     def login(self,email,c_password):
         user = self.storage.get_user_by_email(email)
-        if user is None:
-            return {'message':'user not found'}
         if c_password == user['password']:
-            return user
+            return True
         else:
-            return {'message':'please check your password'}
+            return False
+
+    def get_user_by_email(self,email):
+        return self.storage.get_user_by_email(email)
+
+    def get_user_by_id(self,user_id):
+        return self.storage.get_user_by_id(user_id)
