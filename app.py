@@ -164,13 +164,33 @@ def store(store_id):
         cars_service.delete_car(car_id)
         stores_service.delete_car(store_id,car_id)
         return car_id
-        
+
+@app.route('/cars',methods=['GET'])
+def cars():
+    arg = request.args
+    name = arg.get('name')
+    brand = arg.get('brand')
+    color = arg.get('color')
+    model_year = arg.get('model_year')
+    city = arg.get('city')
+    price = arg.get('price')
+    search_query={}
+    if name is not None:
+        search_query.update({'name':name})
+    if brand is not None:
+        search_query.update({'brand':brand})
+    if color is not None:
+        search_query.update({'color':color})
+    if model_year is not None:
+        search_query.update({'model_year':model_year})
+    if city is not None:
+        search_query.update({'city':city})
+    if price is not None:
+        search_query.update({'price':price})
+
+    return cars_service.filter(search_query)
 
 
-@app.route('/deneme')
-def deneme():
-    store=  stores_service.get_store_by_id('63431946bec0d9b13566ab53')
-    return store
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=3000)

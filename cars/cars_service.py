@@ -10,3 +10,6 @@ class CarService:
 
     def delete_car(self,car_id):
         return self.storage.delete_car(car_id)
+
+    def filter(self,search_query):
+        return self.storage.filter(search_query)

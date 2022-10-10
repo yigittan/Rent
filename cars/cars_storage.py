@@ -25,3 +25,17 @@ class CarMongoStorage:
     def delete_car(self,car_id):
         self.db.delete_one({'_id':ObjectId(car_id)})
         return car_id
+
+    def filter(self,search_query):
+        cars = self.db.find(search_query)
+        return [{
+            "name":car['name'],
+            "brand":car['brand'],
+            "color":car['color'],
+            "model_year":car['model_year'],
+            "price":car['price'],
+            'store_id':car['store_id'],
+            "km":car['km'],
+            "city":car['city'],
+            "rent":car['rent']
+        }for car in cars]
