@@ -5,11 +5,8 @@ class CarService:
     def create(self,car):
         return self.storage.insert(car)
 
-    def car_by_id(self,car_id):
-        res = self.storage.get_by_id(car_id)
-        return res
+    def update_car(self,car,car_id):
+        return self.storage.update_car(car,car_id)
 
-    def filter(self,filter_query):
-        return self.storage.get_by_filter(filter_query)
-    
-    
+    def delete_car(self,car_id):
+        return self.storage.delete_car(car_id)

@@ -1,50 +1,27 @@
+from bson.objectid import ObjectId
+
 class CarMongoStorage:
     def __init__(self,client):
         self.db = client.db.cars
 
     def insert(self,car):
         res = self.db.insert_one({
-            "store_id":car.store_id,
-            "name":car.name,
+            'name':car.name,
             "brand":car.brand,
-            "price":car.price,
-            "model_year":car.model_year,
             "color":car.color,
-            "status":car.status,
-            "km":car.km
+            "model_year":car.model_year,
+            "price":car.price,
+            "store_id":car.store_id,
+            "km":car.km,
+            "city":car.city,
+            "rent":car.rent
         })
-
         return str(res.inserted_id)
-    
-    def get_by_id(self,car_id):
-        car = self.db.find_one({'_id':car_id})
-        if car is None:
-            return None
-        return {
-            "id":str(car['id']),
-            "store_id":car['store_id'], 
-            "name":car['name'],
-            "brand":car['brand'],
-            "price":car['price'],
-            "year":car['year'],
-            "status":car['status'],
-            "store":car['user_id']
-        }
 
-    def get_by_filter(self,filter_query):
-        cars = self.db.find(filter_query)
-        cars_array = [{
-            "id":str(car['id']),
-            "name":car['name'],
-            "brand":car['brand'],
-            "price":car['price'],
-            "year":car['year'],
-            "status":car['status'],
-            "store_id":car['user_id'],
-            "km":car['km'],
-            "city":car['city']
-        }for car in cars]
+    def update_car(self,car,car_id):
+        self.db.update_one({'_id':ObjectId(car_id)} , {'$set': {'name':car.name , 'brand':car.brand, 'color':car.color, 'model_year':car.model_year, 'price':car.price, 'store_id':car.store_id, 'km':car.km, 'city':car.city,'rent':car.rent}})
+        return car_id
 
-        return cars_array
-
-    
+    def delete_car(self,car_id):
+        self.db.delete_one({'_id':ObjectId(car_id)})
+        return car_id

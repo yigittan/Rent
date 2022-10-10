@@ -1,11 +1,11 @@
 class Car:
-    def __init__(self,name,brand,model_year,color,price,status,store_id,km,city):
+    def __init__(self,name,brand,color,model_year,price,store_id,km,city,rent):
         self.name = name
         self.brand = brand
-        self.model_year = model_year
         self.color = color
+        self.model_year = model_year
         self.price = price
-        self.status = status
         self.store_id = store_id
         self.km = km
         self.city = city
+        self.rent = rent
