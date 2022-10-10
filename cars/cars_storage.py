@@ -39,3 +39,9 @@ class CarMongoStorage:
             "city":car['city'],
             "rent":car['rent']
         }for car in cars]
+
+
+    def rent(self,car_id):
+        self.db.update_one({'_id':ObjectId(car_id)},{'$set':{'rent':'Already Rented'}})
+        car = self.db.find_one({'_id':ObjectId(car_id)})
+        return car['rent']        

@@ -187,8 +187,12 @@ def cars():
         search_query.update({'city':city})
     if price is not None:
         search_query.update({'price':price})
-
     return cars_service.filter(search_query)
+
+@app.route('/cars/<string:car_id>',methods=['POST'])
+def rent(car_id):
+    return cars_service.rent(car_id)
+
 
 
 

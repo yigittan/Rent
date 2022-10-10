@@ -13,3 +13,6 @@ class CarService:
 
     def filter(self,search_query):
         return self.storage.filter(search_query)
+
+    def rent(self,car_id):
+        return self.storage.rent(car_id)
