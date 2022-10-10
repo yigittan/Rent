@@ -166,6 +166,7 @@ def store(store_id):
         return car_id
         
 
+
 @app.route('/deneme')
 def deneme():
     store=  stores_service.get_store_by_id('63431946bec0d9b13566ab53')
