@@ -62,6 +62,73 @@ def auth_store(func):
             return {'message': 'Please Log in'}
     return wrapper
 
+def filter():
+    arg = request.args
+    name = arg.get('name')
+    brand = arg.get('brand')
+    color = arg.get('color')
+    model_year = arg.get('model_year')
+    city = arg.get('city')
+    price = arg.get('price')
+    search_query = {}
+    if name is not None:
+        search_query.update({'name': name})
+    if brand is not None:
+        search_query.update({'brand': brand})
+    if color is not None:
+        search_query.update({'color': color})
+    if model_year is not None:
+        search_query.update({'model_year': model_year})
+    if city is not None:
+        search_query.update({'city': city})
+    if price is not None:
+        search_query.update({'price': price})
+    return cars_service.filter(search_query)
+
+def create_car(store_id):
+    store = stores_service.get_store_by_id(store_id)
+    body = request.get_json()
+    name = body['name']
+    brand = body['brand']
+    color = body['color']
+    model_year = body['model_year']
+    price = body['price']
+    store_id = store_id
+    km = body['km']
+    city = store['city']
+    rent = "available"
+    car = Car(name, brand, color, model_year,
+                price, store_id, km, city, rent)
+    car_id = cars_service.create(car)
+    stores_service.add_car(car, store_id, car_id)
+    return car_id
+
+def update_car(store_id):
+    store = stores_service.get_store_by_id(store_id)
+    body = request.get_json()
+    car_id = body['car_id']
+    name = body['name']
+    brand = body['brand']
+    color = body['color']
+    model_year = body['model_year']
+    price = body['price']
+    store_id = store_id
+    km = body['km']
+    city = store['city']
+    rent = body['rent']
+    car = Car(name, brand, color, model_year,
+                price, store_id, km, city, rent)
+    cars_service.update_car(car, car_id)
+    stores_service.update_car(car, store_id, car_id)
+    return car_id
+
+def delete_car(store_id):
+    body = request.get_json()
+    car_id = body['car_id']
+    cars_service.delete_car(car_id)
+    stores_service.delete_car(store_id, car_id)
+    return car_id
+
 
 @app.route('/')
 def home():
@@ -133,76 +200,22 @@ def login():
 @auth_store
 def store(store_id):
     if request.method == 'POST':
-        store = stores_service.get_store_by_id(store_id)
-        body = request.get_json()
-        name = body['name']
-        brand = body['brand']
-        color = body['color']
-        model_year = body['model_year']
-        price = body['price']
-        store_id = store_id
-        km = body['km']
-        city = store['city']
-        rent = "available"
-        car = Car(name, brand, color, model_year,
-                  price, store_id, km, city, rent)
-        car_id = cars_service.create(car)
-        stores_service.add_car(car, store_id, car_id)
-        return car_id
+        return create_car(store_id)
 
     if request.method == 'PUT':
-        store = stores_service.get_store_by_id(store_id)
-        body = request.get_json()
-        car_id = body['car_id']
-        name = body['name']
-        brand = body['brand']
-        color = body['color']
-        model_year = body['model_year']
-        price = body['price']
-        store_id = store_id
-        km = body['km']
-        city = store['city']
-        rent = body['rent']
-        car = Car(name, brand, color, model_year,
-                  price, store_id, km, city, rent)
-        cars_service.update_car(car, car_id)
-        stores_service.update_car(car, store_id, car_id)
-        return car_id
+        return update_car(store_id)
 
     if request.method == 'DELETE':
-        body = request.get_json()
-        car_id = body['car_id']
-        cars_service.delete_car(car_id)
-        stores_service.delete_car(store_id, car_id)
-        return car_id
+        return delete_car(store_id)
 
     if request.method == 'GET':
         cars = cars_service.get_all_car_by_id(store_id)
         return cars
 
+
 @app.route('/cars', methods=['GET'])
 def cars():
-    arg = request.args
-    name = arg.get('name')
-    brand = arg.get('brand')
-    color = arg.get('color')
-    model_year = arg.get('model_year')
-    city = arg.get('city')
-    price = arg.get('price')
-    search_query = {}
-    if name is not None:
-        search_query.update({'name': name})
-    if brand is not None:
-        search_query.update({'brand': brand})
-    if color is not None:
-        search_query.update({'color': color})
-    if model_year is not None:
-        search_query.update({'model_year': model_year})
-    if city is not None:
-        search_query.update({'city': city})
-    if price is not None:
-        search_query.update({'price': price})
-    return cars_service.filter(search_query)
+    return filter()
 
 
 @app.route('/cars/<string:car_id>', methods=['POST','GET'], endpoint='cars/<string:car_id>') #wrapper birden çok yerden kullanıldığında nerde kullanıldığını endpoint olarak belirt
