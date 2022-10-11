@@ -44,4 +44,35 @@ class CarMongoStorage:
     def rent(self,car_id):
         self.db.update_one({'_id':ObjectId(car_id)},{'$set':{'rent':'Already Rented'}})
         car = self.db.find_one({'_id':ObjectId(car_id)})
-        return car['rent']        
+        return car['rent']    
+
+    def get_car_by_id(self,car_id):
+        car = self.db.find_one({'_id':ObjectId(car_id)})
+        return {
+            "name":car['name'],
+            "brand":car['brand'],
+            "color":car['color'],
+            "model_year":car['model_year'],
+            "price":car['price'],
+            'store_id':car['store_id'],
+            "km":car['km'],
+            "city":car['city'],
+            "rent":car['rent']
+        }
+        
+    def get_all_car_by_id(self,store_id):
+        print("BURADAYIM")
+        cars = self.db.find({'store_id':store_id})
+        print("BURADAYIM")
+        return [{
+            "id":str(car['_id']),
+            "name":car['name'],
+            "brand":car['brand'],
+            "color":car['color'],
+            "model_year":car['model_year'],
+            "price":car['price'],
+            'store_id':car['store_id'],
+            "km":car['km'],
+            "city":car['city'],
+            "rent":car['rent']
+        }for car in cars]

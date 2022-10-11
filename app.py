@@ -176,6 +176,9 @@ def store(store_id):
         stores_service.delete_car(store_id, car_id)
         return car_id
 
+    if request.method == 'GET':
+        cars = cars_service.get_all_car_by_id(store_id)
+        return cars
 
 @app.route('/cars', methods=['GET'])
 def cars():
@@ -202,11 +205,14 @@ def cars():
     return cars_service.filter(search_query)
 
 
-@app.route('/cars/<string:car_id>', methods=['POST'], endpoint='cars/<string:car_id>') #wrapper birden çok yerden kullanıldığında nerde kullanıldığını endpoint olarak belirt
+@app.route('/cars/<string:car_id>', methods=['POST','GET'], endpoint='cars/<string:car_id>') #wrapper birden çok yerden kullanıldığında nerde kullanıldığını endpoint olarak belirt
 @auth_customer
 def rent(car_id):
-    return cars_service.rent(car_id)
-
+    if request.method == 'POST':
+        return cars_service.rent(car_id)
+    
+    if request.method == 'GET':
+        return cars_service.get_car_by_id(car_id)
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=3000)

@@ -16,3 +16,9 @@ class CarService:
 
     def rent(self,car_id):
         return self.storage.rent(car_id)
+
+    def get_car_by_id(self,car_id):
+        return self.storage.get_car_by_id(car_id)
+
+    def get_all_car_by_id(self,store_id):
+        return self.storage.get_all_car_by_id(store_id)
