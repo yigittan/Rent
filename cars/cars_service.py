@@ -22,3 +22,10 @@ class CarService:
 
     def get_all_car_by_id(self,store_id):
         return self.storage.get_all_car_by_id(store_id)
+
+    def cancel_car(self,car_id):
+        car = self.storage.get_car_by_id(car_id)
+        if car['rent'] == 'Already Rented':
+            return True
+        else:
+            return False

@@ -45,12 +45,12 @@ class CarMongoStorage:
     def rent(self, car_id):
         self.db.update_one({'_id': ObjectId(car_id)}, {
                            '$set': {'rent': 'Already Rented'}})
-        car = self.db.find_one({'_id': ObjectId(car_id)})
-        return car['rent']
+        return car_id
 
     def get_car_by_id(self, car_id):
         car = self.db.find_one({'_id': ObjectId(car_id)})
         return {
+            "id":car_id,
             "name": car['name'],
             "brand": car['brand'],
             "color": car['color'],

@@ -4,13 +4,13 @@ import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 
-from customers.Customer import Customer
+from customers.customer import Customer
 from customers.customers_service import CustomerService
 from customers.customers_storage import CustomerMongoStorage
-from stores.Store import Store
+from stores.store import Store
 from stores.stores_service import StoreService
 from stores.stores_storage import StoreMongoStorage
-from cars.Car import Car
+from cars.car import Car
 from cars.cars_service import CarService
 from cars.cars_storage import CarMongoStorage
 
@@ -35,6 +35,7 @@ def login_customer(token, email):
     customer = customers_service.get_customer_by_email(email)
     session['customer'] = True
     session['id'] = customer['id']
+    session['email'] = email
     session['token'] = token
 
 
@@ -149,7 +150,9 @@ def customer():
     email = body['email']
     password = body['password']
     city = body['city']
-    customer = Customer(name, surname, username, email, password, city)
+    wallet = 0
+    rented_cars = []
+    customer = Customer(name, surname, username, email, password, city, wallet, rented_cars)
     res = customers_service.create(customer)
     return jsonify(res)
 
@@ -212,6 +215,17 @@ def store(store_id):
         cars = cars_service.get_all_car_by_id(store_id)
         return cars
 
+@app.route('/stores/<string:store_id>/<string:car_id>' , methods=['POST'], endpoint='stores/<string:store_id>/<string:car_id>')
+# @auth_store
+def cancel(store_id,car_id):
+    car = cars_service.get_car_by_id(car_id)
+    res = cars_service.cancel_car(car_id)
+    if (res):
+        customer = customers_service.get_all_customers(car_id)
+        return customers_service.pay_back(customer,car)
+    else:
+        return 'The car did not rent by someone'
+    
 
 @app.route('/cars', methods=['GET'])
 def cars():
@@ -222,8 +236,15 @@ def cars():
 @auth_customer
 def rent(car_id):
     if request.method == 'POST':
-        return cars_service.rent(car_id)
-    
+        email = session.get('email')
+        customer = customers_service.get_customer_by_email(email)
+        car = cars_service.get_car_by_id(car_id)
+        if(customers_service.rent(car,customer)):
+            cars_service.rent(car_id)
+            return "success rented"
+        else:
+            return 'Money is not enough to rent a car'
+
     if request.method == 'GET':
         return cars_service.get_car_by_id(car_id)
 

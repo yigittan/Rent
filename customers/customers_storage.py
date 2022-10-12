@@ -1,3 +1,5 @@
+from bson.objectid import ObjectId
+
 class CustomerMongoStorage:
     def __init__(self,client):
         self.db = client.db.customers
@@ -9,7 +11,9 @@ class CustomerMongoStorage:
             'username':customer.username,
             'email':customer.email,
             'password':customer.password,
-            'city':customer.city
+            'city':customer.city,
+            "wallet":customer.wallet,
+            "rented_cars":customer.rented_cars
         })
         return str(res.inserted_id)
 
@@ -20,6 +24,32 @@ class CustomerMongoStorage:
                 "id": str(customer['_id']),
                 "name":customer['name'],
                 "username":customer['username'],
-                "password":customer['password']
+                "password":customer['password'],
+                "customer":customer['email'],
+                "wallet":customer['wallet'],
+                "rented_cars":customer['rented_cars']
             }
         return None
+
+    def update_wallet_for_rent(self,customer,wallet,car_id):
+        customer_id = customer['id']
+        self.db.update_one({'_id':ObjectId(customer_id)}, {'$set': {'wallet':wallet }})
+        res = self.db.update_one({'_id':ObjectId(customer_id)} , {'$push': {'rented_cars':car_id}})
+        print(res)
+        return wallet
+
+    def get_all_customers(self):
+        customers = self.db.find()
+        return [{
+            "id": str(customer['_id']),
+                "name":customer['name'],
+                "username":customer['username'],
+                "password":customer['password'],
+                "customer":customer['email'],
+                "wallet":customer['wallet'],
+                "rented_cars":customer['rented_cars']
+        }for customer in customers]
+
+    def update_wallet(self,customer,wallet):
+        self.db.update_one({'_id':ObjectId(customer['id'])}, {'$set': {'wallet':wallet}})
+        return customer['id']
