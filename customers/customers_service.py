@@ -17,7 +17,7 @@ class CustomerService:
     def get_customer_by_email(self,email):
         return self.storage.get_customer_by_email(email)
 
-    def rent(self,car,customer):
+    def is_available(self,car,customer):
         wallet = customer['wallet']
         car_id = car['id']
         price = car['price']

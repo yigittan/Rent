@@ -29,3 +29,10 @@ class StoreService:
 
     def delete_car(self,store_id,car_id):
         return self.storage.delete_car(store_id,car_id)
+
+    def payment_for_rent(self,car,store):
+        store_wallet = store['store_wallet']
+        payment = car['price']
+        store_wallet +=payment
+        store_id = car['store_id']
+        return self.storage.update_store_wallet(store_wallet,store_id)

@@ -165,7 +165,8 @@ def stores():
     cars = []
     email = body['email']
     password = body['password']
-    store = Store(name, city, cars, email, password)
+    store_wallet = 0
+    store = Store(name, city, cars, email, password,store_wallet)
     res = stores_service.create(store)
     return jsonify(res)
 
@@ -200,7 +201,7 @@ def login():
 
 
 @app.route('/stores/<string:store_id>', methods=['GET', 'PUT', 'POST', 'DELETE'], endpoint='store/<string:store_id>')
-@auth_store
+# @auth_store
 def store(store_id):
     if request.method == 'POST':
         return create_car(store_id)
@@ -239,7 +240,11 @@ def rent(car_id):
         email = session.get('email')
         customer = customers_service.get_customer_by_email(email)
         car = cars_service.get_car_by_id(car_id)
-        if(customers_service.rent(car,customer)):
+        store_id = car['store_id']
+        print(store_id)
+        store = stores_service.get_store_by_id(store_id)
+        if(customers_service.is_available(car,customer)):
+            stores_service.payment_for_rent(car,store)
             cars_service.rent(car_id)
             return "success rented"
         else:

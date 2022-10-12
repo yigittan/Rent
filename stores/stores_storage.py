@@ -10,7 +10,8 @@ class StoreMongoStorage:
             "city":store.city,
             "cars":store.cars,
             "email":store.email,
-            "password":store.password
+            "password":store.password,
+            "store_wallet":store.store_wallet
         })
         return str(res.inserted_id)
 
@@ -21,16 +22,19 @@ class StoreMongoStorage:
                 'id':str(store['_id']),
                 'name':store['name'],
                 "cars":store['cars'],
-                "password":store['password']
+                "password":store['password'],
+                "store_wallet":store['store_wallet']
             }
         return None
 
     def get_store_by_id(self,store_id):
         store = self.db.find_one({'_id':ObjectId(store_id)})
+        print(store)
         return {
             'name':store['name'],
             'city':store['city'],
-            'cars':store['cars']
+            'cars':store['cars'],
+            'store_wallet':store['store_wallet']
         }
 
     def add_car(self,car,store_id,car_id):
@@ -49,3 +53,7 @@ class StoreMongoStorage:
     def delete_car(self,store_id,car_id):
         self.db.update_one({'_id':ObjectId(store_id)} , {'$pull': {'cars':car_id}})
         return car_id
+
+    def update_store_wallet(self,store_wallet,store_id):
+        self.db.update_one({'_id':ObjectId(store_id)} , {'$set': {'store_wallet':store_wallet}})
+        return store_id
