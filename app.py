@@ -1,19 +1,18 @@
-from flask import Flask, request, jsonify, session
-from flask_pymongo import PyMongo
-import jwt
 from datetime import datetime, timedelta
-from functools import wraps
 
+import jwt
+from flask import Flask, jsonify, request, session
+from flask_pymongo import PyMongo
+
+from cars.car import Car
+from cars.cars_service import CarService
+from cars.cars_storage import CarMongoStorage
 from customers.customer import Customer
 from customers.customers_service import CustomerService
 from customers.customers_storage import CustomerMongoStorage
 from stores.store import Store
 from stores.stores_service import StoreService
 from stores.stores_storage import StoreMongoStorage
-from cars.car import Car
-from cars.cars_service import CarService
-from cars.cars_storage import CarMongoStorage
-
 
 app = Flask(__name__)
 
@@ -31,12 +30,14 @@ car_storage = CarMongoStorage(client)
 cars_service = CarService(car_storage)
 
 
+
 def login_customer(token, email):
     customer = customers_service.get_customer_by_email(email)
     session['customer'] = True
     session['id'] = customer['id']
     session['email'] = email
     session['token'] = token
+
 
 def sum():
     return 8
@@ -208,6 +209,14 @@ def login():
         return {'access_token': token.decode(), "duration": 120*1000}
     else:
         return 'Pleasse check your information'
+
+class StoreMethods:
+    def __init__(self,create_car,update_car,delete_car):
+        self.create_car = create_car
+        self.update_car= update_car
+        self.delete_car = delete_car
+
+store_methods = StoreMethods(create_car(),update_car(),delete_car())
 
 
 @app.route('/stores/<string:store_id>', methods=['GET', 'PUT', 'POST', 'DELETE'], endpoint='store/<string:store_id>')
