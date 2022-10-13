@@ -7,12 +7,8 @@ class CustomerService:
 
     def login(self,email,c_password):
         customer =  self.storage.get_customer_by_email(email)
-        if customer is not None:
-            if c_password == customer['password']:
-                return True
-            else:
-                return False
-        return False
+        return customer is not None and c_password == customer['password']
+ 
 
     def get_customer_by_email(self,email):
         return self.storage.get_customer_by_email(email)

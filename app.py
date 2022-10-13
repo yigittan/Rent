@@ -38,6 +38,9 @@ def login_customer(token, email):
     session['email'] = email
     session['token'] = token
 
+def sum():
+    return 8
+
 
 def auth_customer(func):
     def wrapper(*args, **kwargs):
@@ -63,6 +66,7 @@ def auth_store(func):
             return {'message': 'Please Log in'}
     return wrapper
 
+
 def filter():
     arg = request.args
     name = arg.get('name')
@@ -86,6 +90,7 @@ def filter():
         search_query.update({'price': price})
     return cars_service.filter(search_query)
 
+
 def create_car(store_id):
     store = stores_service.get_store_by_id(store_id)
     body = request.get_json()
@@ -99,10 +104,11 @@ def create_car(store_id):
     city = store['city']
     rent = "available"
     car = Car(name, brand, color, model_year,
-                price, store_id, km, city, rent)
+              price, store_id, km, city, rent)
     car_id = cars_service.create(car)
     stores_service.add_car(car, store_id, car_id)
     return car_id
+
 
 def update_car(store_id):
     store = stores_service.get_store_by_id(store_id)
@@ -118,10 +124,11 @@ def update_car(store_id):
     city = store['city']
     rent = body['rent']
     car = Car(name, brand, color, model_year,
-                price, store_id, km, city, rent)
+              price, store_id, km, city, rent)
     cars_service.update_car(car, car_id)
     stores_service.update_car(car, store_id, car_id)
     return car_id
+
 
 def delete_car(store_id):
     body = request.get_json()
@@ -135,10 +142,11 @@ def delete_car(store_id):
 def home():
     return 'HOme Page'
 
+
 @app.route('/logout')
 def logout():
     session.clear()
-    return {'message':'Exit'}
+    return {'message': 'Exit'}
 
 
 @app.route('/register/customers', methods=['POST'])
@@ -152,7 +160,8 @@ def customer():
     city = body['city']
     wallet = 0
     rented_cars = []
-    customer = Customer(name, surname, username, email, password, city, wallet, rented_cars)
+    customer = Customer(name, surname, username, email,
+                        password, city, wallet, rented_cars)
     res = customers_service.create(customer)
     return jsonify(res)
 
@@ -166,7 +175,7 @@ def stores():
     email = body['email']
     password = body['password']
     store_wallet = 0
-    store = Store(name, city, cars, email, password,store_wallet)
+    store = Store(name, city, cars, email, password, store_wallet)
     res = stores_service.create(store)
     return jsonify(res)
 
@@ -183,19 +192,20 @@ def login():
         token = jwt.encode({
             "id": store['id'],
             "name": store['name'],
-            "expiration": str(datetime.utcnow() + timedelta(seconds=120))
+            "exp": (datetime.utcnow() + timedelta(seconds=120)).timestamp()
         }, key=app.config['SECRET_KEY'])
         login_store(token, email)
-        return token
+        return {'access_token': token, "duration": timedelta(seconds=120)}
     elif customer:
         customer = customers_service.get_customer_by_email(email)
         token = jwt.encode({
             "id": customer['id'],
             "name": customer['name'],
-            "expiration": str(datetime.utcnow() + timedelta(seconds=240))
+            "exp": (datetime.now() + timedelta(seconds=120)).timestamp()
         }, key=app.config['SECRET_KEY'])
         login_customer(token, email)
-        return token
+        print(token.decode())
+        return {'access_token': token.decode(), "duration": 120*1000}
     else:
         return 'Pleasse check your information'
 
@@ -203,6 +213,12 @@ def login():
 @app.route('/stores/<string:store_id>', methods=['GET', 'PUT', 'POST', 'DELETE'], endpoint='store/<string:store_id>')
 # @auth_store
 def store(store_id):
+    bearer_token = request.headers.get('Authorization')
+    print(bearer_token)
+    token = bearer_token.removeprefix('Bearer ')
+    print(token)
+    print(jwt.decode(token, key=app.config['SECRET_KEY']))
+
     if request.method == 'POST':
         return create_car(store_id)
 
@@ -216,24 +232,26 @@ def store(store_id):
         cars = cars_service.get_all_car_by_id(store_id)
         return cars
 
-@app.route('/stores/<string:store_id>/<string:car_id>' , methods=['POST'], endpoint='stores/<string:store_id>/<string:car_id>')
-# @auth_store
-def cancel(store_id,car_id):
+
+@app.route('/stores/<string:store_id>/<string:car_id>', methods=['POST'], endpoint='stores/<string:store_id>/<string:car_id>')
+@auth_store
+def cancel(store_id, car_id):
     car = cars_service.get_car_by_id(car_id)
     res = cars_service.cancel_car(car_id)
     if (res):
         customer = customers_service.get_all_customers(car_id)
-        return customers_service.pay_back(customer,car)
+        return customers_service.pay_back(customer, car)
     else:
         return 'The car did not rent by someone'
-    
+
 
 @app.route('/cars', methods=['GET'])
 def cars():
     return filter()
 
 
-@app.route('/cars/<string:car_id>', methods=['POST','GET'], endpoint='cars/<string:car_id>') #wrapper birden çok yerden kullanıldığında nerde kullanıldığını endpoint olarak belirt
+# wrapper birden çok yerden kullanıldığında nerde kullanıldığını endpoint olarak belirt
+@app.route('/cars/<string:car_id>', methods=['POST', 'GET'], endpoint='cars/<string:car_id>')
 @auth_customer
 def rent(car_id):
     if request.method == 'POST':
@@ -243,8 +261,8 @@ def rent(car_id):
         store_id = car['store_id']
         print(store_id)
         store = stores_service.get_store_by_id(store_id)
-        if(customers_service.is_available(car,customer)):
-            stores_service.payment_for_rent(car,store)
+        if(customers_service.is_available(car, customer)):
+            stores_service.payment_for_rent(car, store)
             cars_service.rent(car_id)
             return "success rented"
         else:
@@ -252,6 +270,7 @@ def rent(car_id):
 
     if request.method == 'GET':
         return cars_service.get_car_by_id(car_id)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=3000)
