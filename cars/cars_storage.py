@@ -50,7 +50,7 @@ class CarMongoStorage:
     def get_car_by_id(self, car_id):
         car = self.db.find_one({'_id': ObjectId(car_id)})
         return {
-            "id":car_id,
+            "id": car_id,
             "name": car['name'],
             "brand": car['brand'],
             "color": car['color'],
@@ -76,3 +76,7 @@ class CarMongoStorage:
             "city":car['city'],
             "rent":car['rent']
         }for car in cars]
+    
+    def update_car_rent(self,car_id):
+        self.db.update_one({'_id':ObjectId(car_id)} , {'$set': {'rent':'available'}})
+        return car_id

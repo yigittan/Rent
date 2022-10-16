@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
 
+
 class CustomerMongoStorage:
     def __init__(self,client):
         self.db = client.db.customers
@@ -35,7 +36,6 @@ class CustomerMongoStorage:
         customer_id = customer['id']
         self.db.update_one({'_id':ObjectId(customer_id)}, {'$set': {'wallet':wallet }})
         res = self.db.update_one({'_id':ObjectId(customer_id)} , {'$push': {'rented_cars':car_id}})
-        print(res)
         return wallet
 
     def get_all_customers(self):
@@ -50,6 +50,7 @@ class CustomerMongoStorage:
                 "rented_cars":customer['rented_cars']
         }for customer in customers]
 
-    def update_wallet(self,customer,wallet):
+    def update_wallet(self,customer,wallet,car_id):
         self.db.update_one({'_id':ObjectId(customer['id'])}, {'$set': {'wallet':wallet}})
+        self.db.update_one({'_id':ObjectId(customer['id'])}, {'$pull': {'rented_cars':car_id}})
         return customer['id']

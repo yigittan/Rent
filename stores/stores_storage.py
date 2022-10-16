@@ -57,3 +57,7 @@ class StoreMongoStorage:
     def update_store_wallet(self,store_wallet,store_id):
         self.db.update_one({'_id':ObjectId(store_id)} , {'$set': {'store_wallet':store_wallet}})
         return store_id
+
+    def update_only_store_wallet(self, store_id,store_wallet):
+        self.db.update_one({'_id':ObjectId(store_id)}, {'$set': {'store_wallet':store_wallet}})
+        return store_id

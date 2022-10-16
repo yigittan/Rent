@@ -36,3 +36,10 @@ class StoreService:
         store_wallet +=payment
         store_id = car['store_id']
         return self.storage.update_store_wallet(store_wallet,store_id)
+    
+    def update_store_wallet(self, store_id,car):
+        store = self.storage.get_store_by_id(store_id)
+        store_wallet = store['store_wallet']
+        price = car['price']
+        store_wallet -= price
+        return self.storage.update_only_store_wallet(store_id,store_wallet)

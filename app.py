@@ -5,16 +5,17 @@ import jwt
 from flask import Flask, jsonify, request, session
 from flask_pymongo import PyMongo
 
-from cars.car import Car
 from cars.cars_service import CarService
 from cars.cars_storage import CarMongoStorage
-from customers.customer import Customer
 from customers.customers_service import CustomerService
 from customers.customers_storage import CustomerMongoStorage
+from models.car import Car
+from models.customer import Customer
+from models.store import Store
 from routes.r_cars import r_cars
+from routes.r_generals import r_general
 from routes.r_registers import r_register
 from routes.r_stores import r_store
-from stores.store import Store
 from stores.stores_service import StoreService
 from stores.stores_storage import StoreMongoStorage
 
@@ -23,6 +24,7 @@ app = Flask(__name__)
 client = PyMongo(app, uri='mongodb://localhost:27017/Rent')
 
 app.config['SECRET_KEY'] = 'secret_key'
+secret_key = app.config['SECRET_KEY']
 
 customer_storage = CustomerMongoStorage(client)
 customers_service = CustomerService(customer_storage)
@@ -147,45 +149,13 @@ def create_token(store_id, store_name, secret_key):
     return token
 
 
-@app.route('/')
-def home():
-    return 'HOme Page'
-
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return {'message': 'Exit'}
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    body = request.get_json()
-    email = body['email']
-    c_password = body['password']
-    customer = customers_service.login(email, c_password)
-    store = stores_service.login(email, c_password)
-    if store:
-        store = stores_service.get_store_by_email(email)
-        token = create_token(
-            store['id'], store['name'], app.config['SECRET_KEY'])
-        login_store(token, email)
-        return token
-    elif customer:
-        customer = customers_service.get_customer_by_email(email)
-        token = create_token(
-            store['id'], store['name'], app.config['SECRET_KEY'])
-        login_customer(token, email)
-        return token
-    else:
-        return 'Pleasse check your information'
-
-
 app.register_blueprint(r_store, url_prefix='/stores')
 
 app.register_blueprint(r_register, url_prefix='/register')
 
 app.register_blueprint(r_cars, url_prefix='/cars')
+
+app.register_blueprint(r_general)
 
 
 if __name__ == '__main__':

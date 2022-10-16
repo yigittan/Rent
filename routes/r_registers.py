@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 r_register = Blueprint('r_register', __name__)
 
 
-@r_register.route('/register/customers', methods=['POST'])
+@r_register.route('/customers', methods=['POST'])
 def customer():
     import app
     body = request.get_json()
@@ -21,7 +21,7 @@ def customer():
     return jsonify(res)
 
 
-@r_register.route('/register/stores', methods=['POST'])
+@r_register.route('/stores', methods=['POST'])
 def stores():
     import app
     body = request.get_json()

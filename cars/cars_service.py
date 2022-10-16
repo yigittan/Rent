@@ -29,3 +29,6 @@ class CarService:
             return True
         else:
             return False
+        
+    def update_car_rent(self,car_id):
+        return self.storage.update_car_rent(car_id)

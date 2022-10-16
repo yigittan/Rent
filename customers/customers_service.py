@@ -19,6 +19,7 @@ class CustomerService:
 
     def is_available(self,car,customer):
         wallet = customer['wallet']
+        print(wallet)
         car_id = car['id']
         price = car['price']
         if wallet >= price and car['rent'] == "available":
@@ -32,11 +33,14 @@ class CustomerService:
         for customer in customers:
             if car_id in customer['rented_cars']:
                 return customer
+    
             
     def pay_back(self,customer,car):
         wallet = customer['wallet']
         price = car['price']
+        car_id = car['id']
+        print(car_id)
         wallet +=price
-        return self.storage.update_wallet(customer,wallet)
+        return self.storage.update_wallet(customer,wallet,car_id)
             
             
